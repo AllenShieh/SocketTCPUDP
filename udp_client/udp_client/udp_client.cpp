@@ -32,7 +32,7 @@ int main()
 
 	if (sockfd<0)
 	{
-		printf("Socket   Error:%s\n");
+		printf("Socket Error:%s\n");
 		exit(1);
 	}
 
@@ -58,9 +58,10 @@ int main()
 		
 		while (1){
 			n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
-			temp[n] = 0;
+			//temp[n] = 0;
 			if (n <= 0){
 				printf("nothing received\n");
+				system("pause");
 				exit(0);
 			}
 			if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
