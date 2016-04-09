@@ -25,43 +25,6 @@ char IP[DEFAULT_BUFLEN] = "";
 char filename[DEFAULT_BUFLEN] = "";
 char temp[DEFAULT_BUFLEN] = "";
 
-//receiver thread
-DWORD WINAPI receiver(LPVOID lpParameter){
-
-	while (1)
-	{
-		char temp2[DEFAULT_BUFLEN];
-		int num = 0;
-		num = recv(ConnectSocket, temp2, DEFAULT_BUFLEN, 0);
-		temp2[num] = '\0';
-		if (strcmp(temp2, "ESC") == 0){
-			printf("lost connection\n");
-			exit(0);
-		}
-		if (num == 0) break;
-		printf("filename: %s\n", temp2);
-
-		// file transfer   
-		FILE * fp = fopen(temp2, "rb"); // binary mode for read  
-		if (fp == NULL)
-		{
-			printf("open file %s failed\n", temp2);
-			return -1;
-		}
-		int numm = 0;
-		while (!feof(fp))
-		{
-			numm = fread(temp2, 1, DEFAULT_BUFLEN, fp);
-			send(ConnectSocket, temp2, numm, 0);
-		}
-		send(ConnectSocket, "EOF", 3, 0);
-		printf("file sent\n");
-		fclose(fp);
-	}
-
-	return 0;
-}
-
 int main()
 {
 	printf("TCP server\n");
@@ -130,11 +93,6 @@ int main()
 	closesocket(ListenSocket);
 
 	printf("waiting for request\n");
-
-	//create threads
-	//HANDLE handle1, handle2;
-	//handle1 = CreateThread(NULL, 0, sender, NULL, 0, NULL);
-	//handle2 = CreateThread(NULL, 0, receiver, NULL, 0, NULL);
 
 	while (1)
 	{

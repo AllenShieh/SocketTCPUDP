@@ -1,43 +1,25 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <Windows.h>
 #include <WinSock.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
-/*           客户端程序            */
-
 #define MAX_BUF_SIZE     1024 
+char temp[MAX_BUF_SIZE] = "";
+char filename[MAX_BUF_SIZE] = "";
 
 char IP[20] = "59.78.22.231";
 char PORT[20] = "8888";
-
-void udpc_requ(int sockfd, const struct sockaddr_in *addr, int len)
-{
-	char buffer[MAX_BUF_SIZE];
-	int n;
-	while (1)
-	{
-		/*    从键盘读入,写到服务端  */
-		fgets(buffer, MAX_BUF_SIZE, stdin);
-		sendto(sockfd, buffer, strlen(buffer), 0, (sockaddr *)addr, len);
-		memset(buffer, 0, MAX_BUF_SIZE);
-
-		/*    从网络上读,写到屏幕上   */
-		n = recvfrom(sockfd, buffer, MAX_BUF_SIZE, 0, NULL, NULL);
-		buffer[n] = 0;
-		fputs(buffer, stdout);
-	}
-}
 
 int main()
 {
 	printf("UDP client\n");
 	int port = 8888;
-	struct sockaddr_in       addr;
+	struct sockaddr_in addr;
 	WSADATA wsa;
 	SOCKET sockfd;
 
-	//初始化套接字
 	WSAStartup(MAKEWORD(2, 2), &wsa);
 
 	if ((port = atoi(PORT))<0)
@@ -54,8 +36,6 @@ int main()
 		exit(1);
 	}
 
-	/*       填充服务端的资料     */
-
 	memset(&addr, 0, sizeof(struct sockaddr_in));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -66,7 +46,35 @@ int main()
 	}
 
 	addr.sin_addr.S_un.S_addr = inet_addr(IP);
-	udpc_requ(sockfd, &addr, sizeof(struct sockaddr_in));
+
+
+	int n;
+	while (1)
+	{
+		scanf("%s", filename);
+		sendto(sockfd, filename, strlen(filename), 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+
+		FILE * fp = fopen(filename, "wb");
+		
+		while (1){
+			n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
+			temp[n] = 0;
+			if (n <= 0){
+				printf("nothing received\n");
+				exit(0);
+			}
+			if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
+				n = n - 3;
+				temp[n] = '\0';
+				fwrite(temp, 1, n, fp);
+				break;
+			}
+			fwrite(temp, 1, n, fp);
+		}
+		printf("file received\n");
+		fclose(fp);
+	}
+
 	//close(sockfd); 
 	WSACleanup();
 

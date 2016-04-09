@@ -1,40 +1,22 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <Windows.h>
 #include <WinSock.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define SERVER_PORT      8888 
-#define MAX_MSG_SIZE     1024 
-
-void udps_respon(int sockfd)
-{
-	struct sockaddr_in addr;
-	int      addrlen, n;
-	char     msg[MAX_MSG_SIZE];
-
-	addrlen = sizeof(sockaddr_in);
-
-	while (1)
-	{
-		/* 从网络上度,写到网络上面去  */
-		n = recvfrom(sockfd, msg, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
-		msg[n] = 0;
-
-		/* 显示服务端已经收到了信息 */
-		fprintf(stdout, "Received %s", msg);
-		sendto(sockfd, msg, n, 0, (struct sockaddr*)&addr, addrlen);
-	}
-}
+#define SERVER_PORT 8888 
+#define MAX_MSG_SIZE 1024 
+char filename[MAX_MSG_SIZE] = "";
+char temp[MAX_MSG_SIZE] = "";
 
 int main()
 {
 	printf("UDP server\n");
 	WSADATA wsa;
 	SOCKET sockfd;
-	struct sockaddr_in       addr;
+	struct sockaddr_in addr;
 
-	//初始化套接字
 	WSAStartup(MAKEWORD(2, 2), &wsa);
 
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -53,7 +35,26 @@ int main()
 		exit(1);
 	}
 
-	udps_respon(sockfd);
+	int addrlen, n;
+
+	addrlen = sizeof(sockaddr_in);
+
+	while (1)
+	{
+		n = recvfrom(sockfd, filename, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
+		filename[n] = 0;
+		//printf("filename: %s\n", filename);
+
+		FILE * fp = fopen(filename, "rb");
+
+		while (!feof(fp)){
+			n = fread(temp, 1, MAX_MSG_SIZE, fp);
+			sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+		}
+		sendto(sockfd, "EOF", 3, 0, (struct sockaddr*)&addr, addrlen);
+		printf("file sent\n");
+		fclose(fp);
+	}
 
 	WSACleanup();
 }

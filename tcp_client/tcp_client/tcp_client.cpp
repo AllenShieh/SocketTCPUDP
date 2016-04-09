@@ -25,39 +25,6 @@ char IP[DEFAULT_BUFLEN] = "59.78.22.231";
 char filename[DEFAULT_BUFLEN] = "";
 char temp[DEFAULT_BUFLEN] = "";
 
-//sender thread
-DWORD WINAPI sender(LPVOID lpParameter){
-
-	while (1){
-		char temp[DEFAULT_BUFLEN];
-		scanf("%s", temp);
-		send(ConnectSocket, temp, 256, 0);
-
-		// receive file status
-		FILE *fp = fopen(temp, "wb");
-		if (fp == NULL)
-		{
-			printf("create file %s failed\n", temp);
-			return -1;
-		}
-		int num = 0;
-		char tt[DEFAULT_BUFLEN];
-		while (1)
-		{
-			num = recv(ConnectSocket, tt, DEFAULT_BUFLEN, 0);
-			cout << "length:" << num << endl;
-			if (num == 0) break;
-			//if (!strcmp(tt, "EOF")) break;
-			fwrite(tt, 1, num, fp);
-		}
-		printf("fils received\n");
-		fclose(fp);
-	}
-
-	return 0;
-}
-
-
 int main()
 {
 	printf("TCP client\n");
@@ -116,12 +83,6 @@ int main()
 	}
 
 	printf("input file name:\n");
-
-	//create threads
-	//HANDLE handle1, handle2;
-	//handle1 = CreateThread(NULL, 0, sender, NULL, 0, NULL);
-	//handle2 = CreateThread(NULL, 0, receiver, NULL, 0, NULL);
-
 
 	while (1){
 		scanf("%s", filename);
