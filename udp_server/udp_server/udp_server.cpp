@@ -9,6 +9,7 @@
 #define MAX_MSG_SIZE 1024 
 char filename[MAX_MSG_SIZE] = "";
 char temp[MAX_MSG_SIZE] = "";
+char ack[20] = "";
 
 int main()
 {
@@ -48,10 +49,70 @@ int main()
 		FILE * fp = fopen(filename, "rb");
 
 		while (!feof(fp)){
-			n = fread(temp, 1, MAX_MSG_SIZE, fp);
+			//n = fread(temp, 1, MAX_MSG_SIZE, fp);
+			//bool ack = false;
+			//while (!ack){
+			//	sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+			//	recvfrom(sockfd, temp, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
+			//	temp[3] = '\0';
+			//	if (!strcmp(temp, "ACK")){
+			//		printf("ACK\n");
+			//		ack = true;
+			//	}
+			//}
+			int status = 1;
+			n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+			temp[n] = '1';
+			n = n + 1;
 			sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+			while (!feof(fp)){
+				struct timeval tv;
+				fd_set readfds;
+				FD_ZERO(&readfds);
+				FD_SET(sockfd, &readfds);
+				tv.tv_sec = 3;
+				tv.tv_usec = 10;
+				select(sockfd + 1, &readfds, NULL, NULL, &tv);
+				if (FD_ISSET(sockfd, &readfds)){
+					recvfrom(sockfd, ack, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
+					temp[4] = '\0';
+					if (!strcmp(ack, "ACK1")){
+						//printf("ACK1\n");
+						if (status == 1){
+							n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+							temp[n] = '2';
+							n = n + 1;
+							sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+							status = 2;
+						}
+						else if (status == 2){
+							continue;
+						}
+					}
+					else if (!strcmp(ack, "ACK2")){
+						//printf("ACK2\n");
+						if (status == 2){
+							n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+							temp[n] = '1';
+							n = n + 1;
+							sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+							status = 1;
+						}
+						else if (status == 1){
+							continue;
+						}
+					}
+				}
+				else{
+					printf("time out\n");
+					sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
+				}
+			}
+			
 		}
+		recvfrom(sockfd, ack, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
 		sendto(sockfd, "EOF", 3, 0, (struct sockaddr*)&addr, addrlen);
+
 		printf("file sent\n");
 		fclose(fp);
 	}

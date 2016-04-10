@@ -56,21 +56,50 @@ int main()
 
 		FILE * fp = fopen(filename, "wb");
 		
+		int status = 1;
 		while (1){
-			n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
-			//temp[n] = 0;
-			if (n <= 0){
-				printf("nothing received\n");
-				system("pause");
-				exit(0);
+			//n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
+			//sendto(sockfd, "ACK", 3, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+			//if (n <= 0){
+			//	printf("nothing received\n");
+			//	system("pause");
+			//	exit(0);
+			//}
+			//if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
+			//	n = n - 3;
+			//	temp[n] = '\0';
+			//	fwrite(temp, 1, n, fp);
+			//	break;
+			//}
+			//fwrite(temp, 1, n, fp);
+			if (status == 1){
+				n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
+				if (temp[n - 1] == '1'){
+					sendto(sockfd, "ACK1", 4, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+					fwrite(temp, 1, n-1, fp);
+					status = 2;
+				}
+				else if (temp[n - 1] == '2'){
+					continue;
+				}
+				else if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
+					break;
+				}
 			}
-			if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
-				n = n - 3;
-				temp[n] = '\0';
-				fwrite(temp, 1, n, fp);
-				break;
+			else if (status == 2){
+				n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
+				if (temp[n - 1] == '2'){
+					sendto(sockfd, "ACK2", 4, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+					fwrite(temp, 1, n - 1, fp);
+					status = 1;
+				}
+				else if (temp[n - 1] == '1'){
+					continue;
+				}
+				else if (n >= 3 && temp[n - 1] == 'F' && temp[n - 2] == 'O' && temp[n - 3] == 'E'){
+					break;
+				}
 			}
-			fwrite(temp, 1, n, fp);
 		}
 		printf("file received\n");
 		fclose(fp);
