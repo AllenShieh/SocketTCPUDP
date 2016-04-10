@@ -14,7 +14,7 @@ char PORT[20] = "8888";
 
 int main()
 {
-	printf("UDP client\n");
+	printf("UDP client\nInput filename:\n");
 	int port = 8888;
 	struct sockaddr_in addr;
 	WSADATA wsa;

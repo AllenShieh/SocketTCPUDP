@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <WinSock.h>
+#include <time.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -47,12 +48,17 @@ int main()
 
 		FILE * fp = fopen(filename, "rb");
 
+		time_t begin = clock();
+
 		while (!feof(fp)){
 			n = fread(temp, 1, MAX_MSG_SIZE, fp);
 			sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
 		}
 		sendto(sockfd, "EOF", 3, 0, (struct sockaddr*)&addr, addrlen);
-		printf("file sent\n");
+
+		time_t end = clock();
+
+		printf("file sent. time: %f\n", double(end - begin) * 1000 / CLOCKS_PER_SEC);
 		fclose(fp);
 	}
 

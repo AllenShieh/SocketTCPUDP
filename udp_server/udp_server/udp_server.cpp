@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <WinSock.h>
+#include <time.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -13,7 +14,7 @@ char ack[20] = "";
 
 int main()
 {
-	printf("UDP server\n");
+	printf("UDP server with RDT\nWaiting for requests\n");
 	WSADATA wsa;
 	SOCKET sockfd;
 	struct sockaddr_in addr;
@@ -47,7 +48,7 @@ int main()
 		//printf("filename: %s\n", filename);
 
 		FILE * fp = fopen(filename, "rb");
-
+		time_t start = clock();
 		while (!feof(fp)){
 			//n = fread(temp, 1, MAX_MSG_SIZE, fp);
 			//bool ack = false;
@@ -112,8 +113,8 @@ int main()
 		}
 		recvfrom(sockfd, ack, MAX_MSG_SIZE, 0, (struct sockaddr*)&addr, &addrlen);
 		sendto(sockfd, "EOF", 3, 0, (struct sockaddr*)&addr, addrlen);
-
-		printf("file sent\n");
+		time_t end = clock();
+		printf("file sent. time: %f\n", double(end - start) * 1000 / CLOCKS_PER_SEC);
 		fclose(fp);
 	}
 

@@ -21,14 +21,15 @@ SOCKET ConnectSocket = INVALID_SOCKET;
 //SOCKET ClientSocket = INVALID_SOCKET;
 
 //enter the ip you are going to chat with
-char IP[DEFAULT_BUFLEN] = "59.78.22.231";
+//char IP[DEFAULT_BUFLEN] = "59.78.22.231";
+char IP[50] = "";
 char filename[DEFAULT_BUFLEN] = "";
 char temp[DEFAULT_BUFLEN] = "";
 
 int main()
 {
-	printf("TCP client\n");
-
+	printf("TCP client\nInput IP:\n");
+	scanf("%s", IP);
 	//whatever, i barely understand these
 	int iResult = 0;
 	WSADATA wsaData;
@@ -82,7 +83,7 @@ int main()
 		return 1;
 	}
 
-	printf("input file name:\n");
+	printf("Input file name:\n");
 
 	while (1){
 		scanf("%s", filename);

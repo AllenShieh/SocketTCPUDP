@@ -10,6 +10,7 @@
 #include <iostream>
 #include <conio.h>
 #include <stdlib.h>
+#include <time.h>
 using namespace std;
 #pragma comment (lib, "Ws2_32.lib")  
 #pragma comment (lib, "Mswsock.lib")  
@@ -110,6 +111,8 @@ int main()
 			return -1;
 		}
 
+		time_t begin = clock();
+
 		while (!feof(fp))
 		{
 			num = fread(temp, 1, DEFAULT_BUFLEN, fp);
@@ -117,7 +120,10 @@ int main()
 			send(ConnectSocket, temp, num, 0);
 		}
 		send(ConnectSocket, "EOF", 3, 0);
-		printf("file sent\n");
+
+		time_t end = clock();
+
+		printf("file sent. time: %f\n", double(end - begin) * 1000 / CLOCKS_PER_SEC);
 		fclose(fp);
 	}
 
