@@ -115,8 +115,13 @@ int main()
 
 		while (!feof(fp))
 		{
-			num = fread(temp, 1, DEFAULT_BUFLEN, fp);
-			//printf("%s\n", temp);
+			num = fread(temp, 1, DEFAULT_BUFLEN - 1, fp);
+			char c = 0;
+			for (int k = 0; k < num; k++){
+				c = (c + (temp[k] % 127)) % 127;
+			}
+			temp[num] = c;
+			num = num + 1;
 			send(ConnectSocket, temp, num, 0);
 		}
 		send(ConnectSocket, "EOF", 3, 0);

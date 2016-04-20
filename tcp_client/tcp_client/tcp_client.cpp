@@ -97,6 +97,8 @@ int main()
 			return -1;
 		}
 		int num = 0;
+		int total = 0;
+		int wrong = 0;
 		while (1)
 		{
 			num = recv(ConnectSocket, temp, DEFAULT_BUFLEN, 0);
@@ -112,9 +114,21 @@ int main()
 				fwrite(temp, 1, num, fp);
 				break;
 			}
-			fwrite(temp, 1, num, fp);
+			char c = 0;
+			for (int k = 0; k < num - 1; k++){
+				c = (c + (temp[k] % 127)) % 127;
+			}
+			if (c == temp[num - 1]){
+				//printf("right %c %c\n", c, temp[num - 1]);
+			}
+			else{
+				//printf("wrong %c %c\n", c, temp[num - 1]);
+				wrong++;
+			}
+			total++;
+			fwrite(temp, 1, num - 1, fp);
 		}
-		printf("fils received\n");
+		printf("fils received\ntotal packets: %d\nwrong packets: %d\n", total, wrong);
 		fclose(fp);
 	}
 

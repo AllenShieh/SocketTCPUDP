@@ -57,6 +57,8 @@ int main()
 		FILE * fp = fopen(filename, "wb");
 		
 		int status = 1;
+		int total = 0;
+		int wrong = 0;
 		while (1){
 			//n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
 			//sendto(sockfd, "ACK", 3, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
@@ -75,8 +77,20 @@ int main()
 			if (status == 1){
 				n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
 				if (temp[n - 1] == '1'){
+					char c = 0;
+					for (int k = 0; k < n - 2; k++){
+						c += temp[k];
+					}
+					if (c == temp[n - 2]){
+						//printf("right\n");
+					}
+					else{
+						//printf("wrong\n");
+						wrong++;
+					}
+					total++;
 					sendto(sockfd, "ACK1", 4, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-					fwrite(temp, 1, n-1, fp);
+					fwrite(temp, 1, n-2, fp);
 					status = 2;
 				}
 				else if (temp[n - 1] == '2'){
@@ -89,8 +103,20 @@ int main()
 			else if (status == 2){
 				n = recvfrom(sockfd, temp, MAX_BUF_SIZE, 0, NULL, NULL);
 				if (temp[n - 1] == '2'){
+					char c = 0;
+					for (int k = 0; k < n - 2; k++){
+						c += temp[k];
+					}
+					if (c == temp[n - 2]){
+						//printf("right\n");
+					}
+					else{
+						//printf("wrong\n");
+						wrong++;
+					}
+					total++;
 					sendto(sockfd, "ACK2", 4, 0, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
-					fwrite(temp, 1, n - 1, fp);
+					fwrite(temp, 1, n - 2, fp);
 					status = 1;
 				}
 				else if (temp[n - 1] == '1'){
@@ -101,7 +127,7 @@ int main()
 				}
 			}
 		}
-		printf("file received\n");
+		printf("file received\ntotal packets: %d\nwrong packets: %d\n", total, wrong);
 		fclose(fp);
 	}
 

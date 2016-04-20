@@ -62,9 +62,16 @@ int main()
 			//	}
 			//}
 			int status = 1;
-			n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+			n = fread(temp, 1, MAX_MSG_SIZE - 2, fp);
+			char c = 0;
+			for (int k = 0; k < n; k++){
+				c += temp[k];
+			}
+			temp[n] = c;
+			n = n + 1;
 			temp[n] = '1';
 			n = n + 1;
+			//printf("%c, %c\n", temp[n - 2], temp[n - 1]);
 			sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
 			while (!feof(fp)){
 				struct timeval tv;
@@ -80,7 +87,13 @@ int main()
 					if (!strcmp(ack, "ACK1")){
 						//printf("ACK1\n");
 						if (status == 1){
-							n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+							n = fread(temp, 1, MAX_MSG_SIZE - 2, fp);
+							char c = 0;
+							for (int k = 0; k < n; k++){
+								c += temp[k];
+							}
+							temp[n] = c;
+							n = n + 1;
 							temp[n] = '2';
 							n = n + 1;
 							sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
@@ -93,7 +106,13 @@ int main()
 					else if (!strcmp(ack, "ACK2")){
 						//printf("ACK2\n");
 						if (status == 2){
-							n = fread(temp, 1, MAX_MSG_SIZE - 1, fp);
+							n = fread(temp, 1, MAX_MSG_SIZE - 2, fp);
+							char c = 0;
+							for (int k = 0; k < n; k++){
+								c += temp[k];
+							}
+							temp[n] = c;
+							n = n + 1;
 							temp[n] = '1';
 							n = n + 1;
 							sendto(sockfd, temp, n, 0, (struct sockaddr*)&addr, addrlen);
